@@ -1,4 +1,16 @@
-function combine (n1: number, n2: number) {
-    const result = n1 + n2;
-    return result
-} 
+function add(n1: number, n2: number) {
+    return n1 + n2;
+}
+
+function printResult(num: number) {
+    console.log('Result: ' + num);
+}
+
+printResult(add(5, 17))
+
+let combineValues: (a: number, b: number) => number;
+
+combineValues = add;
+combineValues = printResult;
+
+console.log(combineValues(5, 5));
