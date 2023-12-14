@@ -1,16 +1,3 @@
-function add(n1: number, n2: number) {
-    return n1 + n2;
-}
+let userName = 'Maximilian';
 
-function printResult(num: number) {
-    console.log('Result: ' + num);
-}
-
-printResult(add(5, 17))
-
-let combineValues: (a: number, b: number) => number;
-
-combineValues = add;
-combineValues = printResult;
-
-console.log(combineValues(5, 5));
+console.log(userName);
