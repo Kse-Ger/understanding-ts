@@ -5,9 +5,13 @@
     }
 } */
 
-const person = {
-    name: "Ksenija",
+/* const person = {
+    firstName: "Ksenija",
     age: 27
 };
+
+const {firstName: namesss, age} = person
+
+console.log(namesss, age) */
 
 // For tuples TS doesn't catch the .push() error
