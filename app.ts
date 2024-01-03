@@ -1,47 +1,116 @@
-/* interface Person { // can be same as type Person = {}. Interfaces can only be used to describe structure, type is more flexible. Interface is more clearer
-    // Interface can be implemented by class
-    name: string; // can't assign default value
-    age: number;
-
-    greet(phrase: string): void;
-} */
-
-interface AddFn {
-    (a: number, b: number): number; // anonymous function
-}
-
-let add1: AddFn;
-
-add1 = (n1: number, n2: number) => {
-    return n1 + n2;
-}
-
-interface Named {
-    readonly name: string; // can't use private or public in interfaces
-    outputName?: string; // optional property
-}
-
-interface Greetable extends Named{
-    greet(phrase: string): void;
-}
-
-class Person implements Greetable { // can implement multiple interfaces
+type Admin = {
     name: string;
-    outputName?: string;
-    age = 27;
+    privilages: string [];
+}
 
-    constructor(n: string, outName?: string) {
-        this.name = n;
+type Employee = {
+    name: string;
+    startDate: Date;
+}
+
+type ElevatedEmployee = Admin & Employee;
+
+const e1: ElevatedEmployee = {
+    name: 'Max',
+    privilages: ['create-server'],
+    startDate: new Date()
+}
+
+type Combinable = string | number;
+type Numeric = number | boolean;
+
+type Universal = Combinable & Numeric;
+
+
+function add(a: Combinable, b: Combinable) {
+    if (typeof a === 'string' || typeof b === 'string') { // Type Guard
+        return a.toString() + b.toString()
     }
-    
-    greet(phrase: string) { // interfaces force classes that implement it to have same methods and properties as interface
-        console.log(phrase + ' ' + this.name);
+    return a+b
+}
+
+type UnknonEmployee = Employee | Admin;
+
+function printEmployeeInfo (emp: UnknonEmployee) {
+    console.log('Name: '+ emp.name)
+    if ('privilaes' in emp) { // Type Guard
+        console.log('Privilages: '+emp.privilaes)
     }
-} 
+}
 
-let user1: Greetable;
-user1 = new Person('Lena')
-let user2 = new Person('Lena', 'Jelena')
-// user1.name = 'Ksenia'; returns error because name is readonly
+printEmployeeInfo(e1)
 
-user1.greet('Hi there! I am');
+class Car {
+    drive() {
+        console.log('Driving...')
+    }
+}
+
+class Truck {
+    drive() {
+        console.log('Driving truck...')
+    }
+    loadCargo(amount: number) {
+        console.log('Loading cargo ... ' + amount)
+    }
+}
+
+type Vehicle = Car | Truck;
+
+const v1 = new Car();
+const v2 = new Truck();
+
+function useVehicle(vehicle: Vehicle) {
+    vehicle.drive();
+    if (vehicle instanceof Truck) { // Type Guard
+        vehicle.loadCargo(1000);
+    }
+}
+
+useVehicle(v1);
+useVehicle(v2);
+
+interface Bird {
+    type: 'bird'; // useful pattern for interfaces
+    flyingSpeed: number;
+}
+
+interface Horse {
+    type: 'horse';
+    runningSpeed: number;
+}
+
+type Animal = Bird | Horse;
+
+function moveAnimal(animal: Animal) {
+    let speed;
+    switch (animal.type) {
+        case 'bird':
+            speed = animal.flyingSpeed;
+            break;
+        case 'horse':
+            speed = animal.runningSpeed
+    }
+    console.log('Moving with speed: ' + speed)
+}
+
+moveAnimal({type: 'bird', flyingSpeed: 10});
+
+//const paragraph = <HTMLInputElement>document.getElementById('user-input')!; // Casting
+const paragraph = document.getElementById('user-input'); // ! 0 will never be null
+
+//paragraph.value = "Hi there!";
+
+if(paragraph) {
+    (paragraph as HTMLInputElement).value = "Hi  there!" // as HTMLInputElement assumes it is not null, so check manueally
+}
+
+interface ErrorContainer {
+    //id: string; // can't set it to a number anymore
+    [prop: string]: string // strings, numbers, characters
+}
+
+const errorBag: ErrorContainer = {
+    email: 'Not a valid email!',
+    username: 'Must start with a capital character!'
+}

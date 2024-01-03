@@ -109,7 +109,7 @@
   "exclude": [
     "node_modules" // would be default
   ],
-  /*"include": [
+  "include": [
     "app.ts" // compiles only files that are listed here, can have whole folders
-  ]*/
+  ]
 }
