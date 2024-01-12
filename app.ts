@@ -1,116 +1,109 @@
-type Admin = {
-    name: string;
-    privilages: string [];
-}
-
-type Employee = {
-    name: string;
-    startDate: Date;
-}
-
-type ElevatedEmployee = Admin & Employee;
-
-const e1: ElevatedEmployee = {
-    name: 'Max',
-    privilages: ['create-server'],
-    startDate: new Date()
-}
-
-type Combinable = string | number;
-type Numeric = number | boolean;
-
-type Universal = Combinable & Numeric;
-
-
-function add(a: Combinable, b: Combinable) {
-    if (typeof a === 'string' || typeof b === 'string') { // Type Guard
-        return a.toString() + b.toString()
+function Logger(logString: string) {
+    console.log('LOGGER DECORATOR')
+    return function(constructor: Function) {
+       console.log(logString)
+       console.log(constructor) 
     }
-    return a+b
+    
 }
 
-type UnknonEmployee = Employee | Admin;
-
-function printEmployeeInfo (emp: UnknonEmployee) {
-    console.log('Name: '+ emp.name)
-    if ('privilaes' in emp) { // Type Guard
-        console.log('Privilages: '+emp.privilaes)
+function WithTemplate(template: string, hookId: string) {  // Decorator Factory, is rendered only when object is instantiated
+    console.log('TEMPLATE DECORATOR')
+    return function<T extends {new(...args: any[]): {name: string}}>(originalConstructor: T) { // _: any - I know I get thos argument, but I won't use it
+        return class extends originalConstructor {
+            constructor(...args: any[]) { // extra logic that runs when the class is instantiated and not when it is defined!!
+                super()
+                console.log('Rendering template')
+                const hookEl = document.getElementById(hookId)
+                if (hookEl) {
+                    hookEl.innerHTML = template
+                    hookEl.querySelector('h1')!.textContent = this.name
+                }
+            }
+        }
     }
 }
 
-printEmployeeInfo(e1)
 
-class Car {
-    drive() {
-        console.log('Driving...')
+@Logger('LOGGING')
+@WithTemplate('<h1>My Person Object!</h1>', 'app') // Decorators are executed from bottom to top (first template, then logger)
+class  Person {
+    name = 'Max';
+
+    constructor() {
+        console.log('Creating person object ...')
+    }
+
+}
+
+const pers = new  Person()
+
+console.log(pers)
+
+// ---- Decorators that are on Methods and Accessors can return, decorators on properties and parameters, don't return (can return, but Typescript will ignore)
+
+function Log(target: any, propertyName: string | Symbol) { // tarhet = prototype
+    console.log('Property decorator')
+    console.log(target, propertyName)
+}
+
+function Log2(target: any, name: string, descriptor: PropertyDescriptor) {
+    console.log('Accessor decorator')
+    console.log(target)
+    console.log(name)
+    console.log(descriptor)
+}
+
+function Log3(target: any, name: string | Symbol, descriptor: PropertyDescriptor) {
+    console.log('Method decorator')
+    console.log(target)
+    console.log(name)
+    console.log(descriptor)
+    
+}
+
+function Log4(target: any, name: string | Symbol, position: number) {
+    console.log('Parameter decorator')
+    console.log(target)
+    console.log(name)
+    console.log(position)
+}
+
+class Product {
+    @Log // Decorators execute when you define class, not when you instantiate the Product (const p1 = new Product)
+    title: string
+    private _price: number
+
+    @Log2
+    set price(val: number) {
+        if(val>0) {
+          this._price = val  
+        } else {
+            throw new Error('Invalid price')
+        }
+        
+    }
+
+    constructor(t: string, p: number) {
+        this.title = t
+        this._price = p
+    }
+
+    @Log3
+    getPriceWithTax(@Log4 tax: number) {
+        return this._price*(1+tax)
     }
 }
 
-class Truck {
-    drive() {
-        console.log('Driving truck...')
+class Printer {
+    message = 'This works'
+
+    showMessage() {
+        console.log(this.message)
     }
-    loadCargo(amount: number) {
-        console.log('Loading cargo ... ' + amount)
-    }
-}
+} 
 
-type Vehicle = Car | Truck;
+const p = new Printer()
 
-const v1 = new Car();
-const v2 = new Truck();
-
-function useVehicle(vehicle: Vehicle) {
-    vehicle.drive();
-    if (vehicle instanceof Truck) { // Type Guard
-        vehicle.loadCargo(1000);
-    }
-}
-
-useVehicle(v1);
-useVehicle(v2);
-
-interface Bird {
-    type: 'bird'; // useful pattern for interfaces
-    flyingSpeed: number;
-}
-
-interface Horse {
-    type: 'horse';
-    runningSpeed: number;
-}
-
-type Animal = Bird | Horse;
-
-function moveAnimal(animal: Animal) {
-    let speed;
-    switch (animal.type) {
-        case 'bird':
-            speed = animal.flyingSpeed;
-            break;
-        case 'horse':
-            speed = animal.runningSpeed
-    }
-    console.log('Moving with speed: ' + speed)
-}
-
-moveAnimal({type: 'bird', flyingSpeed: 10});
-
-//const paragraph = <HTMLInputElement>document.getElementById('user-input')!; // Casting
-const paragraph = document.getElementById('user-input'); // ! 0 will never be null
-
-//paragraph.value = "Hi there!";
-
-if(paragraph) {
-    (paragraph as HTMLInputElement).value = "Hi  there!" // as HTMLInputElement assumes it is not null, so check manueally
-}
-
-interface ErrorContainer {
-    //id: string; // can't set it to a number anymore
-    [prop: string]: string // strings, numbers, characters
-}
-
-const errorBag: ErrorContainer = {
-    email: 'Not a valid email!',
-    username: 'Must start with a capital character!'
-}
+const button = document.querySelector('button')!
+button.addEventListener('click', p.showMessage)
